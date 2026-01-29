@@ -241,7 +241,7 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3005;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
@@ -250,7 +250,7 @@ server.on('error', (e) => {
   if (e.code === 'EADDRINUSE') {
     console.error(`\n❌ ERROR: Port ${PORT} is already in use.`);
     console.error(`   - If you are on aaPanel, the "Node Project" manager likely started this automatically.`);
-    console.error(`   - To fix: Stop the project in aaPanel UI, or run "fuser -k ${PORT}/tcp" to kill the old process.\n`);
+    console.error(`   - To fix: Stop the project in aaPanel UI, or check what is using this port: "netstat -tunlp | grep ${PORT}"\n`);
     process.exit(1);
   } else {
     throw e;
