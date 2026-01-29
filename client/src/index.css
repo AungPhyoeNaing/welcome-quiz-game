@@ -1,0 +1,76 @@
+:root {
+  --bg-color: #FFFBF0;
+  --text-color: #000000;
+  --border-width: 3px;
+  --shadow-offset: 4px;
+  --blue: #4D96FF;
+  --red: #FF6B6B;
+  --green: #6BCB77;
+  --purple: #9D4EDD;
+  --yellow: #FFD93D;
+  --font-main: 'Fredoka', sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-main);
+  background-color: var(--bg-color);
+  background-image: radial-gradient(#000 1px, transparent 1px);
+  background-size: 20px 20px;
+  color: var(--text-color);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+  max-width: 800px;
+  padding: 20px;
+  text-align: center;
+}
+
+button {
+  cursor: pointer;
+  border: var(--border-width) solid #000;
+  font-family: inherit;
+  box-shadow: var(--shadow-offset) var(--shadow-offset) 0px 0px #000;
+  transition: all 0.1s ease;
+  border-radius: 50px; /* Fully rounded buttons */
+}
+
+button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px 0px #000;
+}
+
+.neo-card {
+  background: #fff;
+  border: var(--border-width) solid #000;
+  box-shadow: var(--shadow-offset) var(--shadow-offset) 0px 0px #000;
+  border-radius: 35px; /* Bubbly card corners */
+  padding: 30px;
+}
+
+.btn-primary {
+  background: var(--blue);
+  color: #fff;
+  padding: 12px 30px;
+  border-radius: 50px; /* Pill shape */
+  font-size: 1.3rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.btn-primary:hover {
+  background: #3a80e0;
+}
+
+.rotate-1 { transform: rotate(1deg); }
+.rotate-n1 { transform: rotate(-1deg); }
+.rotate-2 { transform: rotate(2deg); }
+.rotate-n2 { transform: rotate(-2deg); }
