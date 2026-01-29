@@ -1,16 +1,16 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const cors = require('cors');
-const questions = require('./questions');
+const path = require('path');
 
 const app = express();
 app.use(cors());
 
+// Serve static files from the client build directory
+const clientBuildPath = path.join(__dirname, '../client/dist');
+app.use(express.static(clientBuildPath));
+
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*", // Allow all origins for simplicity in this prototype
+    origin: "*", 
     methods: ["GET", "POST"]
   }
 });
@@ -20,6 +20,49 @@ const rooms = {};
 
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
+
+  // Handle explicit leave (e.g. "Wrong Room")
+  socket.on('leave_room', ({ roomId }) => {
+      const room = rooms[roomId];
+      if (room) {
+          const playerIndex = room.players.findIndex(p => p.id === socket.id);
+          if (playerIndex !== -1) {
+              room.players.splice(playerIndex, 1);
+              socket.leave(roomId);
+              
+              io.to(roomId).emit('room_data', {
+                  players: room.players,
+                  gameState: room.gameState
+              });
+          }
+      }
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+    
+    // Find which room this socket is in
+    for (const roomId in rooms) {
+      const room = rooms[roomId];
+      const playerIndex = room.players.findIndex(p => p.id === socket.id);
+      
+      if (playerIndex !== -1) {
+        // If game hasn't started (waiting), remove the player
+        if (room.gameState === 'waiting') {
+          room.players.splice(playerIndex, 1);
+          
+          // Notify remaining player (if any)
+          io.to(roomId).emit('room_data', {
+            players: room.players,
+            gameState: room.gameState
+          });
+        }
+        // If game is in progress, we keep them in the array to allow reconnection
+        // (The join_room logic handles the socket ID update)
+        break;
+      }
+    }
+  });
 
   // Join a room
   socket.on('join_room', ({ username, roomId }) => {
@@ -191,52 +234,25 @@ io.on('connection', (socket) => {
         socket.emit('waiting_results');
     }
   });
+});
 
-  // Handle explicit leave (e.g. "Wrong Room")
-  socket.on('leave_room', ({ roomId }) => {
-      const room = rooms[roomId];
-      if (room) {
-          const playerIndex = room.players.findIndex(p => p.id === socket.id);
-          if (playerIndex !== -1) {
-              room.players.splice(playerIndex, 1);
-              socket.leave(roomId);
-              
-              io.to(roomId).emit('room_data', {
-                  players: room.players,
-                  gameState: room.gameState
-              });
-          }
-      }
-  });
-
-  socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
-    
-    // Find which room this socket is in
-    for (const roomId in rooms) {
-      const room = rooms[roomId];
-      const playerIndex = room.players.findIndex(p => p.id === socket.id);
-      
-      if (playerIndex !== -1) {
-        // If game hasn't started (waiting), remove the player
-        if (room.gameState === 'waiting') {
-          room.players.splice(playerIndex, 1);
-          
-          // Notify remaining player (if any)
-          io.to(roomId).emit('room_data', {
-            players: room.players,
-            gameState: room.gameState
-          });
-        }
-        // If game is in progress, we keep them in the array to allow reconnection
-        // (The join_room logic handles the socket ID update)
-        break;
-      }
-    }
-  });
+// Handle React Routing, return all requests to React app
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
 
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+server.on('error', (e) => {
+  if (e.code === 'EADDRINUSE') {
+    console.error(`\n❌ ERROR: Port ${PORT} is already in use.`);
+    console.error(`   - If you are on aaPanel, the "Node Project" manager likely started this automatically.`);
+    console.error(`   - To fix: Stop the project in aaPanel UI, or run "fuser -k ${PORT}/tcp" to kill the old process.\n`);
+    process.exit(1);
+  } else {
+    throw e;
+  }
 });

@@ -1,16 +1,16 @@
 import io from 'socket.io-client';
 
-// Automatically detect if running on localhost or LAN
-const protocol = window.location.protocol;
-const hostname = window.location.hostname;
-// If we are on https, we might be deployed, but for local dev with ports:
-const port = 3001; 
+const isProduction = import.meta.env.PROD;
 
-const URL = `${protocol}//${hostname}:${port}`;
+// In production, we connect to the same URL serving the page.
+// In development, we connect to the backend port (3001).
+const URL = isProduction 
+  ? undefined 
+  : `${window.location.protocol}//${window.location.hostname}:3001`;
 
 const socket = io(URL, { 
     autoConnect: false,
-    transports: ['websocket'] // Force WebSocket to avoid polling 400 errors
+    transports: ['websocket']
 });
 
 export default socket;
