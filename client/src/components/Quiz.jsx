@@ -112,9 +112,9 @@ const Quiz = ({ roomId, data, onFinish }) => {
       <AnimatePresence mode='wait'>
         <QuestionCard
           key={currentIndex}
-          initial={{ opacity: 0, x: 100, rotate: 5 }}
-          animate={{ opacity: 1, x: 0, rotate: 0 }}
-          exit={{ opacity: 0, x: -100, rotate: -5 }}
+          initial={{ opacity: 0, y: 100 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 100 }}
           transition={{ type: "spring", stiffness: 200, damping: 20 }}
         >
           <QuestionText>{currentQ.text}</QuestionText>

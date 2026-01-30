@@ -79,9 +79,7 @@ const GameRoom = () => {
     socket.on('room_data', (data) => {
       setPlayers(data.players);
       // Sync game state if server is ahead (e.g. reconnection)
-      if (data.gameState !== gameState) {
-          setGameState(data.gameState);
-      }
+      setGameState(data.gameState);
     });
 
     socket.on('game_start_selection', (data) => {
@@ -113,8 +111,9 @@ const GameRoom = () => {
       socket.off('game_start_selection');
       socket.off('start_quiz');
       socket.off('game_over');
+      socket.off('error');
     };
-  }, []);
+  }, [username, roomId, navigate]);
 
   if (!username) return <div>Please login first.</div>;
 
